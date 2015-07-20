@@ -1,21 +1,22 @@
 var gulp        = require('gulp'),
-    traceur     = require('gulp-traceur'),
-    babel       = require('gulp-babel'),
     sourcemaps  = require('gulp-sourcemaps'),
     concat      = require('gulp-concat'),
     ngInject    = require('gulp-ng-annotate'),
     sass        = require('gulp-sass'),
     jshint      = require('gulp-jshint'),
     stylish     = require('jshint-stylish'),
-    del         = require('del');
+    del         = require('del'),
+    browserify  = require('browserify'),
+    babelify    = require('babelify'),
+    through2    = require('through2');
 
 var paths = {
     js: [
         '!src/scripts/background.js',
-        'src/scripts/app.js', // Defines the module, so needs to come 1st
         'src/scripts/*.js'
     ],
     vendor: [
+        'bower_components/commonjs/common.js',
         'bower_components/jquery/dist/jquery.js',
         'bower_components/angular/angular.js',
         'bower_components/angular-animate/angular-animate.js',
@@ -34,13 +35,23 @@ var paths = {
     html: [
         'src/*.html'
     ],
-    images: 'src/images/*',
+    images: [
+        'src/images/*',
+        'bower_components/material-design-icons/av/svg/production/ic_play_arrow_48px.svg',
+        'bower_components/material-design-icons/av/svg/production/ic_stop_48px.svg',
+        'bower_components/material-design-icons/av/svg/production/ic_volume_down_48px.svg',
+        'bower_components/material-design-icons/av/svg/production/ic_volume_up_48px.svg',
+        'bower_components/material-design-icons/navigation/svg/production/ic_close_48px.svg'
+    ],
     fonts: [
         'src/fonts/*',
         'bower_components/font-awesome/fonts/*'
     ],
     manifest: 'src/manifest.json',
-    background: 'src/scripts/background.js'
+    background: 'src/scripts/background.js',
+    svg: [
+        'bower_components/material-design-icons/sprites/svg-sprite/*.svg'
+    ]
 };
 
 gulp.task('build', [
@@ -51,7 +62,8 @@ gulp.task('build', [
     'images',
     'fonts',
     'manifest',
-    'background'
+    'background',
+    'svg'
 ]);
 
 gulp.task('clean', function(cb) {
@@ -69,11 +81,20 @@ gulp.task('js', function() {
         esnext: true
     };
 
+    var browserified = through2.obj(function(file, enc, next) {
+        browserify(file.path)
+            .transform(babelify)
+            .bundle(function(err, res) {
+                file.contents = res;
+                next(null, file);
+            });
+    });
+
     return gulp.src(paths.js)
         .pipe(jshint(jshintConfig))
         .pipe(jshint.reporter(stylish))
+        .pipe(browserified)
         .pipe(sourcemaps.init())
-        .pipe(babel())
         .pipe(ngInject())
         .pipe(concat('app.js'))
         .pipe(sourcemaps.write())
@@ -120,4 +141,9 @@ gulp.task('manifest', function() {
 gulp.task('background', function() {
     return gulp.src(paths.background)
         .pipe(gulp.dest('compiled/scripts'));
+});
+
+gulp.task('svg', function() {
+    return gulp.src(paths.svg)
+        .pipe(gulp.dest('compiled/svg'));
 });

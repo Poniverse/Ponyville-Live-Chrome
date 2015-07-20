@@ -1,15 +1,13 @@
-<ul class="station-list">
-	<li class="station"
-		ng-repeat="station in stationList.stations" 
-		ng-class="{selected: ($index === stationList.currentIndex), offline: station.streams.length === 0}" 
-		ng-click="stationList.setSelected($index)">
-		
-		<img class="icon" alt="{{::station.name}}" ng-src="{{ station.safe_img_url }}">
-		<div class="details">
-			<span class="name">{{::station.name}}</span>
-			<span class="genre">{{::station.genre}}</span>
-			<span class="now-playing-title">{{stationList.nowPlaying[station.shortcode].current_song.title | offline }}</span>
-			<span class="now-playing-artist">{{stationList.nowPlaying[station.shortcode].current_song.artist}}</span>
+<md-list>
+	<md-list-item class="station md-3-line" layout="column" ng-class="{offline: station.offline || station.category === 'video'}" ng-repeat="station in stationList.stations"
+	ng-click="stationList.setSelected($index)">
+		<img class="icon" alt="{{::station.name}}" ng-src="{{station.safeImgUrl}}">
+		<div class="md-list-item-text">
+			<h3 style="text-overflow:elipsis">{{::station.name}}</h3>
+			<h4 style="text-overflow:elipsis">{{::station.genre}}</h4>
+			<p class="one-line">{{stationList.nowPlaying[station.shortcode].current_song.title}}</p>
+			<p class="one-line">{{stationList.nowPlaying[station.shortcode].current_song.artist}}</p>
 		</div>
-	</li>
-</ul>
+		<md-divider ng-if="!$last"></md-divider>
+	</md-list-item>
+</md-list>

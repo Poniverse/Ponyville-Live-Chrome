@@ -1,0 +1,12 @@
+<md-list>
+	<md-list-item ng-repeat="show in showList.shows">
+		<div flex="30">
+			<img class="icon" alt="{{::show.name}}" ng-src="{{show.safeImgUrl}}" />
+		</div>
+		<div flex>
+			<span class="headline name">{{show.name}}</span>
+			<span class="subhead description">{{show.description}}</span>
+		</div>
+		<md-divider ng-if="!$last" />
+	</md-list-item>
+</md-list>
